@@ -1,0 +1,107 @@
+<html>
+ <head>
+     <title>
+         Admin page
+     </title>
+ </head>
+ <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+ <script>
+     document.addEventListener("DOMContentLoaded", getUsers);
+     function getUsers(){
+         $.ajax({
+             type: "GET",
+             contentType: 'application/JSON',
+             url: '127.0.0.1:8087/users',
+             dataType: 'json',
+             headers: {
+              "Authorization":"bearer "+window.localStorage.getItem("access"),
+             },
+             success: function(data, textstatus, error){
+                 document.getElementById("active-users").innerHTML="";
+                 var users = JSON.parse(data);
+                 for(var i =0; users.length; i++) {
+                     var li_tag = document.createElement("li");
+                     li_tag.value = users[i].login;
+                     var input_user = document.createElement("input");
+
+                     var att_type = document.createAttribute("type");  // Create a "class" attribute
+                     att_type.value = "button";
+                     input_user.setAttribute(att_type);
+
+                     var att_id = document.createAttribute("id");
+                     att_id = users[i].login;
+                     input_user.setAttribute(att_id);
+
+                     var att_value = document.createAttribute("value");
+                     if(users[i].isBanned){
+                         att_value="unban";
+                     }else{
+                         att_value="ban";
+                     }
+                     input_user.setAttribute(att_value);
+                     input_user.addEventListener("click", changeStatus);
+                     li_tag.appendChild(input_user);
+                     document.getElementById("active-users").appendChild(li_tag);
+                 }
+
+             },
+             error:function (xhr, ajaxOptions, thrownError){
+                 switch (xhr.status) {
+                     case 401:
+                         refreshAccessToken();break;
+                     default: {
+                         var errorJson = JSON.parse(xhr.responseText);
+                         var message = errorJson.message;
+                         document.getElementById("error").value = message;
+                     }
+                 }
+             }
+         });
+         function changeStatus(obj){
+             var button = obj.currentTarget;
+             var user = button.id;
+             var ban = button.value;
+             if(ban == 'ban'){
+                 banUser(user);
+             }else{
+                 unbanUser(user);
+             }
+             getUsers();
+         }
+
+         function refreshAccessToken(){
+             $.ajax({
+                 type:"POST",
+                 contentType: 'application/x-www-form-urlencoded',
+                 url: 'http://127.0.0.1:8080/auth/realms/chat/protocol/openid-connect/token',
+                 dataType: 'json',
+                 data: jQuery.param({
+                     grant_type: "refresh_token",
+                     client_id: "CLIENT-UI",
+                     refresh_token: window.localStorage.getItem("refresh")
+                 }),
+                 success:function(data, textstatus, error){
+                     var tokens = JSON.parse(data);
+                     var accessToken = tokens.access_token;
+                     var refreshToken = tokens.refresh_token;
+                     window.localStorage.setItem("access",accessToken);
+                     window.localStorage.setItem("refresh", refreshToken);
+                 },
+                 error:function(xhr, ajaxOptions, thrownError){
+                     var errorJson = JSON.parse(xhr.responseText);
+                     var message = errorJson.message;
+                     document.getElementById("error").value = message;
+                 }
+
+             });
+         }
+     }
+ </script>
+<body>
+  <div id = "error"></div>
+  <form>
+    <ul id="active-users"></ul>
+  </form>
+
+</body>
+</html>

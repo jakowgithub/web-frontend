@@ -1,0 +1,61 @@
+<html>
+  <head>
+      <title>Login page</title>
+  </head>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script>
+      document.addEventListener("DOMContentLoaded", myLoad);
+      function myLoad(){
+          document.getElementById("login-button").addEventListener("click", authLogin);
+      }
+      function authLogin() {
+          $.ajax({
+              type:"POST",
+              contentType: 'application/x-www-form-urlencoded',
+              url: 'http://127.0.0.1:8080/auth/realms/chat/protocol/openid-connect/token',
+              dataType: 'json',
+              data: jQuery.param({
+                      grant_type: "password",
+                      client_id: "CLIENT-UI",
+                      username: document.getElementById("login").value,
+                      password: document.getElementById("password").value
+              }),
+              success:function(data, textstatus, error){
+                  var tokens = JSON.parse(data);
+                  var accessToken = tokens.access_token;
+                  var refreshToken = tokens.refresh_token;
+                  window.localStorage.setItem("access",accessToken);
+                  window.localStorage.setItem("refresh", refreshToken);
+
+                  var base64Url = accessToken.split('.')[1];
+                  var accessTokenJSON = JSON.parse(window.atob(base64Url));
+                  var roles = accessTokenJSON.resource_access.chat-service.roles;
+                  if(roles[0] == "ROLE_ADMIN"){
+                      window.location.href = "http://127.0.0.1/admin.html"
+                  }else{
+                      window.location.href = "http://127.0.0.1/chat.html"
+                  }
+              },
+              error:function(xhr, ajaxOptions, thrownError){
+                  var errorJson = JSON.parse(xhr.responseText);
+                  var message = errorJson.message;
+                  document.getElementById("error").value = message;
+              }
+
+          });
+      }
+
+  </script>
+  <body>
+  <div id="error"></div>
+  <br>
+  <form>
+      Login:<input type="text" id = "login"/>
+      <br>
+      Password: <input type="password" id = "password"/>
+      <br>
+      <input type = "button" value="send" id="login-button"/>
+  </form>
+
+  </body>
+</html>

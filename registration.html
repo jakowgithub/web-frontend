@@ -22,8 +22,8 @@
             success:function(data, textstatus, error){
                 window.location.href = 'http://127.0.0.1/index.html';
             },
-            error: function(data){
-                var errorJson = JSON.parse(data);
+            error: function(xhr, ajaxOptions, thrownError){
+                var errorJson = JSON.parse(xhr.responseText);
                 var message = errorJson.message;
                 document.getElementById("error").value = message;
             }
