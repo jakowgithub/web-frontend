@@ -1,0 +1,26 @@
+<html>
+<head>
+    <title>Registration page</title>
+</head>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", myLoad);
+    function myLoad(){
+        document.getElementById("registration-button").addEventListener("click", sendLogin);
+    }
+    function sendLogin() {
+        
+    }
+</script>
+<body>
+<form>
+    Name:<input type="text" id="name"/>
+    <br>
+    Login:<input type="text" id="login"/>
+    <br>
+    Password:<input type="password" id="password"/>
+    <br>
+    <input type="button" value = "send" id="registration-button"/>
+</form>
+</body>
+</html>
