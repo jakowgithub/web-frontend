@@ -13,17 +13,16 @@
               type:"POST",
               contentType: 'application/x-www-form-urlencoded',
               url: 'http://127.0.0.1:8080/auth/realms/chat/protocol/openid-connect/token',
-              dataType: 'json',
+              crossOrigin: false,
               data: jQuery.param({
                       grant_type: "password",
                       client_id: "CLIENT-UI",
                       username: document.getElementById("login").value,
                       password: document.getElementById("password").value
               }),
-              success:function(data, textstatus, error){
-                  var tokens = JSON.parse(data);
-                  var accessToken = tokens.access_token;
-                  var refreshToken = tokens.refresh_token;
+              success:function(data){
+                   var accessToken = data.access_token;
+                  var refreshToken = data.refresh_token;
                   window.localStorage.setItem("access",accessToken);
                   window.localStorage.setItem("refresh", refreshToken);
 
