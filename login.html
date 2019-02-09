@@ -28,7 +28,8 @@
 
                   var base64Url = accessToken.split('.')[1];
                   var accessTokenJSON = JSON.parse(window.atob(base64Url));
-                  var roles = accessTokenJSON.resource_access.chatservice.roles;
+                  console.log(accessTokenJSON);
+                  var roles = accessTokenJSON.resource_access["chat-service"].roles;
                   if(roles[0] == "ROLE_ADMIN"){
                       window.location.href = "http://127.0.0.1/admin.html"
                   }else{

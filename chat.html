@@ -8,9 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js">
   </script>
   <script>
-      var ws = new SockJS("http://localhost:8087/socket", null,
-          {transports: ['xhr-streaming'],
-              headers: {'Authorization': 'bearer ' + window.localStorage.getItem("access")}});
+      var ws = new SockJS("http://localhost:8087/socket?Authorization="+window.localStorage.getItem("access"));
       document.addEventListener("DOMContentLoaded", socketHandler);
       function socketHandler(){
           document.getElementById("send").addEventListener("click", send);
@@ -46,7 +44,7 @@
                       break;
                   }
                   default:{
-                      var errorJson = JSON.parse(xhs.responseText);
+                      var errorJson = xhs.responseText;
                       var message = errorJson.message;
                       document.getElementById("error").value = message;
                   }
