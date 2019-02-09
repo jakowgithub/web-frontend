@@ -21,14 +21,14 @@
                       password: document.getElementById("password").value
               }),
               success:function(data){
-                   var accessToken = data.access_token;
+                  var accessToken = data.access_token;
                   var refreshToken = data.refresh_token;
-                  window.localStorage.setItem("access",accessToken);
+                  window.localStorage.setItem("access", accessToken);
                   window.localStorage.setItem("refresh", refreshToken);
 
                   var base64Url = accessToken.split('.')[1];
                   var accessTokenJSON = JSON.parse(window.atob(base64Url));
-                  var roles = accessTokenJSON.resource_access.chat-service.roles;
+                  var roles = accessTokenJSON.resource_access.chatservice.roles;
                   if(roles[0] == "ROLE_ADMIN"){
                       window.location.href = "http://127.0.0.1/admin.html"
                   }else{
@@ -36,7 +36,7 @@
                   }
               },
               error:function(xhr, ajaxOptions, thrownError){
-                  var errorJson = JSON.parse(xhr.responseText);
+                  var errorJson = xhr.responseText;
                   var message = errorJson.message;
                   document.getElementById("error").value = message;
               }

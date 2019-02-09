@@ -7,67 +7,126 @@
  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
  <script>
      document.addEventListener("DOMContentLoaded", getUsers);
-     function getUsers(){
+     function getUsers() {
          $.ajax({
              type: "GET",
              contentType: 'application/JSON',
-             url: '127.0.0.1:8087/users',
+             url: 'http://127.0.0.1:8087/users',
              dataType: 'json',
              headers: {
-              "Authorization":"bearer "+window.localStorage.getItem("access"),
+                 "Authorization": "bearer " + window.localStorage.getItem("access"),
              },
-             success: function(data, textstatus, error){
-                 document.getElementById("active-users").innerHTML="";
-                 var users = JSON.parse(data);
-                 for(var i =0; users.length; i++) {
+             success: function (data, textstatus, error) {
+                 var users = data;
+                 console.log(users);
+                 document.getElementById("active-users").innerHTML = "";
+                 for (var i = 0; i < users.length; i++) {
                      var li_tag = document.createElement("li");
-                     li_tag.value = users[i].login;
-                     var input_user = document.createElement("input");
+                     li_tag.innerText = users[i].login;
+                     console.log(users[i].login);
+                     console.log(users[i].isBanned);
+                     var input_tag = document.createElement("input");
 
-                     var att_type = document.createAttribute("type");  // Create a "class" attribute
-                     att_type.value = "button";
-                     input_user.setAttribute(att_type);
+                     var att = document.createAttribute("type");       // Create a "class" attribute
+                     att.value = "button";                           // Set the value of the class attribute
+                     input_tag.setAttributeNode(att);
 
-                     var att_id = document.createAttribute("id");
-                     att_id = users[i].login;
-                     input_user.setAttribute(att_id);
+                     att = document.createAttribute("name");
+                     att.value = users[i].login;
+                     input_tag.setAttributeNode(att);
 
-                     var att_value = document.createAttribute("value");
-                     if(users[i].isBanned){
-                         att_value="unban";
-                     }else{
-                         att_value="ban";
+                     att = document.createAttribute("value");
+                     if (users[i].isBanned) {
+                         att.value = "unBanned";
+                     } else {
+                         att.value = "banned";
                      }
-                     input_user.setAttribute(att_value);
-                     input_user.addEventListener("click", changeStatus);
-                     li_tag.appendChild(input_user);
+                     input_tag.setAttributeNode(att);
+                     input_tag.addEventListener("click", changeStatus);
+                     li_tag.appendChild(input_tag);
                      document.getElementById("active-users").appendChild(li_tag);
                  }
 
              },
-             error:function (xhr, ajaxOptions, thrownError){
+             error: function (xhr, ajaxOptions, thrownError) {
                  switch (xhr.status) {
-                     case 401:
-                         refreshAccessToken();break;
+                     case 0:
+                         refreshAccessToken();
+                         getUsers();
+                         break;
                      default: {
-                         var errorJson = JSON.parse(xhr.responseText);
+                         var errorJson = xhr.status;
                          var message = errorJson.message;
                          document.getElementById("error").value = message;
                      }
                  }
              }
          });
+     }
          function changeStatus(obj){
              var button = obj.currentTarget;
-             var user = button.id;
+             var user = button.name;
              var ban = button.value;
-             if(ban == 'ban'){
+             if(ban == 'banned'){
                  banUser(user);
              }else{
                  unbanUser(user);
              }
-             getUsers();
          }
+
+         function banUser(user){
+             $.ajax({
+                 type: "POST",
+                 contentType: 'application/JSON',
+                 url: 'http://127.0.0.1:8087/ban',
+                 headers: {
+                     "Authorization": "bearer " + window.localStorage.getItem("access"),
+                 },
+                 data: JSON.stringify({
+                     'login': user
+                 }),
+                 success: function (data, textstatus, error) {
+                     getUsers();
+                 },
+                 error:function(xhs, textStatus, errorThrown){
+                     if(xhs.status == 0) {
+                         refreshAccessToken();
+                         getUsers();
+                     }else{
+                         var message = xhs.status;
+                         document.getElementById("error").innerText = message;
+
+                     }
+                 }
+
+             });
+         }
+
+         function unbanUser(user){
+             $.ajax({
+                 type: "DELETE",
+                 contentType: 'application/JSON',
+                 url: 'http://127.0.0.1:8087/ban/'+user,
+                 headers: {
+                     "Authorization": "bearer " + window.localStorage.getItem("access"),
+                 },
+                 success: function (data, textstatus, error) {
+                     getUsers();
+                 },
+                 error:function(xhs, textStatus, errorThrown){
+                     if(xhs.status == 0) {
+                         refreshAccessToken();
+                         getUsers();
+                     }else{
+                         var message = xhs.status;
+                         document.getElementById("error").innerText = message;
+
+                     }
+                 }
+
+             });
+         }
+
 
          function refreshAccessToken(){
              $.ajax({
@@ -81,21 +140,19 @@
                      refresh_token: window.localStorage.getItem("refresh")
                  }),
                  success:function(data, textstatus, error){
-                     var tokens = JSON.parse(data);
+                     var tokens = data;
                      var accessToken = tokens.access_token;
                      var refreshToken = tokens.refresh_token;
                      window.localStorage.setItem("access",accessToken);
                      window.localStorage.setItem("refresh", refreshToken);
                  },
                  error:function(xhr, ajaxOptions, thrownError){
-                     var errorJson = JSON.parse(xhr.responseText);
-                     var message = errorJson.message;
-                     document.getElementById("error").value = message;
+                     window.location.href = "http://127.0.0.1/login.html"
+
                  }
 
              });
          }
-     }
  </script>
 <body>
   <div id = "error"></div>
