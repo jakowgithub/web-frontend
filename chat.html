@@ -1,3 +1,8 @@
+<html>
+<head>
+    <title>Chat page</title>
+    <link rel="stylesheet" href="ie.css">
+</head>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js">
 </script>
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js">
@@ -62,7 +67,7 @@
                     break;
                 }
                 case "LIST":{
-                    var users = receiveJson.usersLogin;
+                    var users = receiveJson.usersActive;
                     document.getElementById("active-users").innerHTML="";
                     for(var i = 0; i< users.length; i++){
                         var li_tag = document.createElement("li");
